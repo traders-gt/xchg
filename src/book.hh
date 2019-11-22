@@ -56,11 +56,10 @@ auto Book::match(OrderType& incoming) ->
     } else {
       this->orders.erase(best_match->order_id);
       this->order_ids.erase(best_match_index);
-      // FIXME: Should execute until fill or no more immediate trades possible
       if (exec_quantity < incoming.size) {
         incoming.size -= exec_quantity;
-        this->order_ids.push_back(incoming.order_id);
-        this->orders.emplace(incoming.order_id, std::make_shared<OrderType>(incoming));
+        // Recurse to execute until fill or no more immediate trades possible
+        this->match(incoming);
       }
     }
     agent::reply(incoming.agent, response::Trade(
@@ -77,9 +76,7 @@ auto Book::match(OrderType& incoming) ->
       best_match->direction,
       best_match_price
     ));
-  }
-
-  if (!incoming.flags.IOC) {
+  } else if (!incoming.flags.IOC) {
     // By pushing to the back, this will stay sorted by timestamp
     // which gives preference to earlier orders in the book
     this->order_ids.push_back(incoming.order_id);
@@ -87,12 +84,12 @@ auto Book::match(OrderType& incoming) ->
     agent::reply(incoming.agent, response::Pending(
       incoming.order_id
     ));
+  } else {
+    agent::reply(incoming.agent, response::Failure(
+      incoming.order_id,
+      "IOC order could not be filled"
+    ));
   }
-  
-  agent::reply(incoming.agent, response::Failure(
-    incoming.order_id,
-    "IOC order could not be filled"
-  ));
 }
 
 }
