@@ -16,14 +16,12 @@ struct Book {
 
   template <class OrderType>
   auto match(OrderType& incoming) ->
-    std::enable_if_t<std::is_base_of_v<order::Order, OrderType>,
-                     std::unique_ptr<const packet::Packet>>;
+    std::enable_if_t<std::is_base_of_v<order::Order, OrderType>, void>;
 };
 
 template <class OrderType>
 auto Book::match(OrderType& incoming) ->
-    std::enable_if_t<std::is_base_of_v<order::Order, OrderType>,
-                     std::unique_ptr<const packet::Packet>> {
+    std::enable_if_t<std::is_base_of_v<order::Order, OrderType>, void> {
   bool has_match = false;
   std::vector<order::Id>::iterator best_match_index;
   std::shared_ptr<order::Order> best_match;
@@ -34,6 +32,7 @@ auto Book::match(OrderType& incoming) ->
     auto other = this->orders[*id];
     if (incoming.match(*other)) {
       // Order on book is always favored, so pick their "best price"
+      // FIXME: Market-market match will always return 0 or infinity
       auto match_price = other->get_match_price(incoming);
       if (!has_match) {
         has_match = true;
@@ -57,18 +56,25 @@ auto Book::match(OrderType& incoming) ->
     } else {
       this->orders.erase(best_match->order_id);
       this->order_ids.erase(best_match_index);
+      // FIXME: Should execute until fill or no more immediate trades possible
       if (exec_quantity < incoming.size) {
         incoming.size -= exec_quantity;
         this->order_ids.push_back(incoming.order_id);
         this->orders.emplace(incoming.order_id, std::make_shared<OrderType>(incoming));
       }
     }
-    // FIXME: Inform the other agent of the trade, maybe make a distinction b/w full & partial fills
-    return std::make_unique<const response::Trade>(response::Trade(
+    agent::reply(incoming.agent, response::Trade(
       incoming.order_id,
       best_match->agent,
       exec_quantity,
       incoming.direction,
+      best_match_price
+    ));
+    agent::reply(best_match->agent, response::Trade(
+      best_match->order_id,
+      incoming.agent,
+      exec_quantity,
+      best_match->direction,
       best_match_price
     ));
   }
@@ -78,12 +84,12 @@ auto Book::match(OrderType& incoming) ->
     // which gives preference to earlier orders in the book
     this->order_ids.push_back(incoming.order_id);
     this->orders.emplace(incoming.order_id, std::make_shared<OrderType>(incoming));
-    return std::make_unique<const response::Pending>(response::Pending(
+    agent::reply(incoming.agent, response::Pending(
       incoming.order_id
     ));
   }
   
-  return std::make_unique<const response::Failure>(response::Failure(
+  agent::reply(incoming.agent, response::Failure(
     incoming.order_id,
     "IOC order could not be filled"
   ));
