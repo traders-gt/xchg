@@ -9,6 +9,18 @@
 
 namespace tagt::xchg::book {
 
+/* TODO: We can significantly increase performance if we modify the book
+   data structure. As a first step, we should divide into multiple books
+   where each book corresponds to one specific security. Next, we can
+   split these by direction, since we'll never be searching both buy+sell
+   orders in the same query. Beyond that, we can sort orders by the best
+   price for that direction, while still preserving the queue property of
+   being sorted by time. Finally, we can use different buckets for each
+   order type to cut down on the time needed for sorting.
+   
+   In addition, it would be useful to read about how this is done by
+   real-world exchanges as it is likely a pretty solved problem already.
+*/
 struct Book {
   size_t next_order_id { 0 };
   std::vector<order::Id> order_ids;
@@ -17,6 +29,8 @@ struct Book {
   template <class OrderType>
   auto match(OrderType& incoming) ->
     std::enable_if_t<std::is_base_of_v<order::Order, OrderType>, void>;
+  template<order::Direction dir>
+  int bbo() const;
 };
 
 template <class OrderType>
