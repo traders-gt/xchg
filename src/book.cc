@@ -54,4 +54,33 @@ order::Price Book::bbo(order::Ticker ticker) const {
   return price<dir>(best_order);
 }
 
+// Returns the number of orders of the given direction currently on the book
+template<order::Direction dir>
+size_t Book::directional_volume(order::Ticker ticker) const {
+  size_t count = 0;
+
+  for (auto id: this->order_ids) {
+    auto order = this->orders.at(id);
+    if (order->ticker == ticker && order->direction == dir) {
+      count++;
+    }
+  }
+
+  return count;
+}
+
+// Returns the number of orders currently on the book
+size_t Book::volume(order::Ticker ticker) const {
+  size_t count = 0;
+
+  for (auto id: this->order_ids) {
+    auto order = this->orders.at(id);
+    if (order->ticker == ticker) {
+      count++;
+    }
+  }
+
+  return count;
+}
+
 }
