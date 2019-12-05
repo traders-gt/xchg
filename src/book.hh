@@ -33,6 +33,11 @@ struct Book {
 
   template<order::Direction dir>
   order::Price bbo(order::Ticker) const;
+
+  template<order::Direction dir>
+  size_t directional_volume(order::Ticker) const;
+
+  size_t volume(order::Ticker) const;
 };
 
 template <class OrderType>

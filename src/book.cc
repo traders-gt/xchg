@@ -46,7 +46,8 @@ order::Price Book::bbo(order::Ticker ticker) const {
   std::shared_ptr<const order::Order> best_order = this->orders.at(first_id);
 
   for (auto id: this->order_ids) {
-    if (this->orders.at(id)->ticker == ticker) {
+    auto order = this->orders.at(id);
+    if (order->ticker == ticker && order->direction != dir) {
       best_order = best<dir>(best_order, this->orders.at(id));
     }
   }
