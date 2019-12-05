@@ -27,21 +27,21 @@ inline std::shared_ptr<const order::Order> best<order::Direction::SELL>
 }
 
 template<order::Direction>
-inline int price(std::shared_ptr<const order::Order> a);
+inline order::Price price(std::shared_ptr<const order::Order> a);
 
 template<>
-inline int price<order::Direction::BUY>(std::shared_ptr<const order::Order> a) {
+inline order::Price price<order::Direction::BUY>(std::shared_ptr<const order::Order> a) {
   return a->range().lower;
 }
 
 template<>
-inline int price<order::Direction::SELL>(std::shared_ptr<const order::Order> a) {
+inline order::Price price<order::Direction::SELL>(std::shared_ptr<const order::Order> a) {
   return a->range().upper;
 }
 
 // Returns best price that can be found for an order in the given direction
 template<order::Direction dir>
-int Book::bbo() const {
+order::Price Book::bbo() const {
   auto first_id = this->order_ids[0];
   std::shared_ptr<const order::Order> best_order = this->orders.at(first_id);
 

@@ -29,8 +29,9 @@ struct Book {
   template <class OrderType>
   auto match(OrderType& incoming) ->
     std::enable_if_t<std::is_base_of_v<order::Order, OrderType>, void>;
+  std::unordered_map<order::Ticker, order::Price> last_price;
   template<order::Direction dir>
-  int bbo() const;
+  order::Price bbo() const;
 };
 
 template <class OrderType>
@@ -41,13 +42,16 @@ auto Book::match(OrderType& incoming) ->
   std::shared_ptr<order::Order> best_match;
   order::Price best_match_price {0};
 
+  // Market-market match will always return 0 or infinity. To prevent this, treat all market orders as IOC
+  if (std::is_same_v<OrderType, order::Market>) {
+    incoming.flags.IOC = true;
+  }
   // Shop around for best price
   for (auto id = this->order_ids.begin(); id < this->order_ids.end(); id++) {
     auto other = this->orders[*id];
     if (incoming.match(*other)) {
-      // Order on book is always favored, so pick their "best price"
-      // FIXME: Market-market match will always return 0 or infinity
-      auto match_price = other->get_match_price(incoming);
+      // Incoming order is always favored, so pick their "best price"
+      auto match_price = incoming.get_match_price(*other);
       if (!has_match) {
         has_match = true;
         best_match_index = id;
@@ -90,6 +94,7 @@ auto Book::match(OrderType& incoming) ->
       best_match->direction,
       best_match_price
     ));
+    this->last_price.emplace(incoming.ticker, best_match_price);
   } else if (!incoming.flags.IOC) {
     // By pushing to the back, this will stay sorted by timestamp
     // which gives preference to earlier orders in the book
