@@ -25,13 +25,14 @@ struct Book {
   size_t next_order_id { 0 };
   std::vector<order::Id> order_ids;
   std::unordered_map<order::Id, std::shared_ptr<order::Order>> orders;
+  std::unordered_map<order::Ticker, order::Price> last_price;
 
   template <class OrderType>
   auto match(OrderType& incoming) ->
     std::enable_if_t<std::is_base_of_v<order::Order, OrderType>, void>;
-  std::unordered_map<order::Ticker, order::Price> last_price;
+
   template<order::Direction dir>
-  order::Price bbo() const;
+  order::Price bbo(order::Ticker) const;
 };
 
 template <class OrderType>

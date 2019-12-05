@@ -41,12 +41,14 @@ inline order::Price price<order::Direction::SELL>(std::shared_ptr<const order::O
 
 // Returns best price that can be found for an order in the given direction
 template<order::Direction dir>
-order::Price Book::bbo() const {
+order::Price Book::bbo(order::Ticker ticker) const {
   auto first_id = this->order_ids[0];
   std::shared_ptr<const order::Order> best_order = this->orders.at(first_id);
 
   for (auto id: this->order_ids) {
-    best_order = best<dir>(best_order, this->orders.at(id));
+    if (this->orders.at(id)->ticker == ticker) {
+      best_order = best<dir>(best_order, this->orders.at(id));
+    }
   }
   return price<dir>(best_order);
 }
