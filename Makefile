@@ -1,5 +1,5 @@
 CXX := g++
-CXXFLAGS := -std=c++2a -O3 -Wall -Wpedantic -MMD
+CXXFLAGS := -std=c++17 -O3 -Wall -Wpedantic -MMD
 -include $(OBJ_FILES:.o=.d)
 
 SOURCES := $(wildcard src/*.cc)
@@ -20,4 +20,7 @@ $(TARGET): $(OBJECTS)
 
 build/%.o: src/%.cc
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+docs:
+	@doxygen doxy.cfg
 

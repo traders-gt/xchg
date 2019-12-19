@@ -16,8 +16,8 @@ using Price = uint32_t;
 enum class Direction { BUY, SELL };
 
 struct Flags {
-  bool AON {false}; // All-or-none
-  bool IOC {false}; // Immediate-or-cancel
+  bool AON {false}; /* All-or-none */
+  bool IOC {false}; /* Immediate-or-cancel */
 };
 
 struct Range {

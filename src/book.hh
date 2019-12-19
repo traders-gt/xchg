@@ -24,8 +24,8 @@ namespace tagt::xchg::book {
 struct Book {
   size_t next_order_id { 0 };
   std::vector<order::Id> order_ids;
-  std::unordered_map<order::Id, std::shared_ptr<order::Order>> orders;
-  std::unordered_map<order::Ticker, order::Price> last_price;
+  std::unordered_map<order::Id, std::shared_ptr<order::Order>> orders;/**maps Id to shared_ptr*/
+  std::unordered_map<order::Ticker, order::Price> last_price;/**maps Ticker to Price */ 
 
   template <class OrderType>
   auto match(OrderType& incoming) ->

@@ -6,6 +6,11 @@ template<order::Direction>
 inline std::shared_ptr<const order::Order> best
     (std::shared_ptr<const order::Order> a, std::shared_ptr<const order::Order> b);
 
+/**
+ * @param a shared ptr to an order
+ * @param b shared ptr to another order
+ * @return shared ptr to order with lowest price we can buy something
+ */
 template<>
 inline std::shared_ptr<const order::Order> best<order::Direction::BUY>
     (std::shared_ptr<const order::Order> a, std::shared_ptr<const order::Order> b) {
@@ -16,6 +21,13 @@ inline std::shared_ptr<const order::Order> best<order::Direction::BUY>
   }
 }
 
+/**
+ * Returns shart ptr to the order that has the highest range.upper value for
+ * the highest value we can sell something 
+ * @param a shared ptr to an order
+ * @param b shared ptr to another order
+ * @return shared ptr to order that has the highest range.upper val for selling
+ */
 template<>
 inline std::shared_ptr<const order::Order> best<order::Direction::SELL>
     (std::shared_ptr<const order::Order> a, std::shared_ptr<const order::Order> b) {
