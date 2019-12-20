@@ -1,5 +1,7 @@
 #include "order.hh"
+
 #include <algorithm>
+#include <cassert>
 
 namespace tagt::xchg::order {
 
@@ -23,8 +25,9 @@ Range Limit::range() const {
     case Direction::BUY:
       return { .lower = PRICE_MIN, .upper = this->price };
     case Direction::SELL:
-    default:
       return { .lower = this->price, .upper = PRICE_MAX };
+    default:
+      assert(false);
   }
 }
 
@@ -33,8 +36,9 @@ Range StopLoss::range() const {
     case Direction::BUY:
       return { .lower = this->price, .upper = PRICE_MAX };
     case Direction::SELL:
-    default:
       return { .lower = PRICE_MIN, .upper = this->price };
+    default:
+      assert(false);
   }
 }
 
@@ -56,11 +60,12 @@ bool Order::match(const Order& other) const {
              this->range().overlap(other.range()).is_valid() &&
              (!this->flags.AON || this->size <= other.size);
     case Direction::SELL:
-    default:
       return this->ticker == other.ticker &&
              other.direction == Direction::BUY &&
              this->range().overlap(other.range()).is_valid() &&
              (!this->flags.AON || this->size <= other.size);
+    default:
+      assert(false);
   }
 }
 
@@ -73,8 +78,9 @@ Price Order::get_match_price(const Order& other) const {
     case Direction::BUY:
       return overlap.lower;
     case Direction::SELL:
-    default:
       return overlap.upper;
+    default:
+      assert(false);
   }
 }
 

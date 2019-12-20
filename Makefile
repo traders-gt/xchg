@@ -20,4 +20,3 @@ $(TARGET): $(OBJECTS)
 
 build/%.o: src/%.cc
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
-
