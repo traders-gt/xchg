@@ -22,7 +22,7 @@ namespace tagt::xchg::book {
    real-world exchanges as it is likely a pretty solved problem already.
 */
 struct Book {
-  size_t next_order_id { 0 };
+  order::Id next_order_id { 0 };
   std::vector<order::Id> order_ids;
   std::unordered_map<order::Id, std::shared_ptr<order::Order>> orders;
   std::unordered_map<order::Ticker, order::Price> last_price;
@@ -69,7 +69,6 @@ auto Book::match(OrderType& incoming) ->
         best_match = other;
         best_match_price = match_price;
       }
-
     }
   }
 
